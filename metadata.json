@@ -1,0 +1,6 @@
+{
+  "name": "myApp",
+  "description": "Mobile-first streaming application for listening to free, public-domain audiobooks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
