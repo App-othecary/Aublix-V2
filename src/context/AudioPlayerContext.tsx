@@ -313,6 +313,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
           setCurrentTime(startSeconds);
         }
         audioRef.current.play().catch(() => {});
+        setIsFullPlayerOpen(true);
         return;
       }
 
@@ -321,6 +322,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setCurrentChapterIndex(Math.min(targetChapterIdx, Math.max(0, book.chapters.length - 1)));
       setCurrentTime(targetPos);
       setDuration(book.chapters[targetChapterIdx]?.durationSeconds || 0);
+      setIsFullPlayerOpen(true);
 
       // Enrich full chapter list only when not already pre-baked into the catalog
       if (book.archiveId && !book.chaptersPrebaked && book.chapters.length <= 4) {

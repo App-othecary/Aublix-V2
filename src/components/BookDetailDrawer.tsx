@@ -29,6 +29,7 @@ export function BookDetailDrawer({ book, onClose }: BookDetailDrawerProps) {
     isPlaying,
     playBook,
     togglePlayPause,
+    openFullPlayer,
   } = useAudioPlayer();
 
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -84,14 +85,22 @@ export function BookDetailDrawer({ book, onClose }: BookDetailDrawerProps) {
 
   const handlePrimaryPlay = () => {
     if (isCurrentBook) {
-      togglePlayPause();
+      if (!isPlaying) {
+        togglePlayPause();
+        openFullPlayer();
+        onClose();
+      } else {
+        togglePlayPause();
+      }
     } else {
       playBook(enrichedBook);
+      onClose();
     }
   };
 
   const handlePlayChapter = (index: number) => {
     playBook(enrichedBook, index, 0);
+    onClose();
   };
 
   return (

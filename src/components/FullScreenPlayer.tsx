@@ -88,7 +88,7 @@ export function FullScreenPlayer() {
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-[#0B0D11] text-[#F4F1EA]"
+          className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-[#0B0D11] text-[#F4F1EA]"
         >
           {/* Subtle Cover Glow */}
           {activeBook.coverUrl && (
