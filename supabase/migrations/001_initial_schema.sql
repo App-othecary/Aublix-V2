@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Extends Supabase auth.users with display preferences
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY REFERENCES (select auth.users(id)) ON DELETE CASCADE,
   email TEXT NOT NULL,
   display_name TEXT,
   avatar_url TEXT,
@@ -24,16 +24,16 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view their own profile"
   ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
+  USING ((select auth.uid()) = id);
 
 CREATE POLICY "Users can insert their own profile"
   ON public.profiles FOR INSERT
-  WITH CHECK (auth.uid() = id);
+  WITH CHECK ((select auth.uid()) = id);
 
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
+  USING ((select auth.uid()) = id)
+  WITH CHECK ((select auth.uid()) = id);
 
 -- Automatically create a profile row whenever a new user signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -60,7 +60,7 @@ CREATE TRIGGER on_auth_user_created
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.saved_books (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES (select auth.users(id)) ON DELETE CASCADE,
   book_id TEXT NOT NULL,
   title TEXT NOT NULL,
   author TEXT NOT NULL,
@@ -78,22 +78,22 @@ ALTER TABLE public.saved_books ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can read their own saved books"
   ON public.saved_books FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can save books to their own library"
   ON public.saved_books FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can remove books from their own library"
   ON public.saved_books FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((select auth.uid()) = user_id);
 
 -- -----------------------------------------------------------------------------
 -- 3. LISTENING PROGRESS TABLE (Exact Timestamp & Chapter Sync)
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.listening_progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES (select auth.users(id)) ON DELETE CASCADE,
   book_id TEXT NOT NULL,
   chapter_index INTEGER NOT NULL DEFAULT 0,
   chapter_title TEXT,
@@ -115,20 +115,20 @@ ALTER TABLE public.listening_progress ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can read their own listening progress"
   ON public.listening_progress FOR SELECT
-  USING (auth.uid() = user_id);
+  USING ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can insert their own listening progress"
   ON public.listening_progress FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can update their own listening progress"
   ON public.listening_progress FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+  USING ((select auth.uid()) = user_id)
+  WITH CHECK ((select auth.uid()) = user_id);
 
 CREATE POLICY "Users can delete their own listening progress"
   ON public.listening_progress FOR DELETE
-  USING (auth.uid() = user_id);
+  USING ((select auth.uid()) = user_id);
 
 -- -----------------------------------------------------------------------------
 -- 4. UPDATED_AT TIMESTAMP HELPER
