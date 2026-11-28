@@ -17,7 +17,7 @@ import { HeroBanner } from './components/HeroBanner';
 import { MiniPlayer } from './components/MiniPlayer';
 import { AudioPlayerProvider, useAudioPlayer } from './context/AudioPlayerContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { FALLBACK_CATALOG } from './data/fallbackCatalog';
+import { FULL_CATALOG } from './data/catalog';
 import { filterBooksByCategory, searchAudiobooks } from './lib/catalog';
 import { formatDurationCompact } from './lib/format';
 import { Audiobook, GenreCategory } from './types/audiobook';
@@ -51,15 +51,15 @@ function StreamingAppShell() {
   const [selectedBook, setSelectedBook] = useState<Audiobook | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<GenreCategory>('All');
-  const [searchResults, setSearchResults] = useState<Audiobook[]>(FALLBACK_CATALOG);
+  const [searchResults, setSearchResults] = useState<Audiobook[]>(FULL_CATALOG);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Debounced search hitting curated catalog + live LibriVox / Internet Archive API
+  // Instant search across the Top 100+ static catalog, falling back to Archive.org only if unmatched
   useEffect(() => {
     let active = true;
     const trimmed = searchQuery.trim();
     if (!trimmed) {
-      setSearchResults(FALLBACK_CATALOG);
+      setSearchResults(FULL_CATALOG);
       setIsSearching(false);
       return;
     }
@@ -71,7 +71,7 @@ function StreamingAppShell() {
         setSearchResults(books);
         setIsSearching(false);
       }
-    }, 320);
+    }, 240);
 
     return () => {
       active = false;
@@ -85,25 +85,33 @@ function StreamingAppShell() {
   );
 
   const featuredBook = useMemo(
-    () => FALLBACK_CATALOG.find((b) => b.featured) || FALLBACK_CATALOG[0],
+    () => FULL_CATALOG.find((b) => b.featured) || FULL_CATALOG[0],
     []
   );
 
   const popularClassics = useMemo(
     () =>
-      FALLBACK_CATALOG.filter(
+      FULL_CATALOG.filter(
         (b) => b.genre === 'Classics' || b.genre === 'Philosophy'
-      ),
+      ).slice(0, 16),
     []
   );
 
   const shortListens = useMemo(
-    () => FALLBACK_CATALOG.filter((b) => b.totalDurationSeconds <= 3 * 3600),
+    () =>
+      FULL_CATALOG.filter((b) => b.totalDurationSeconds <= 3 * 3600).slice(0, 16),
     []
   );
 
   const mysteryGothic = useMemo(
-    () => FALLBACK_CATALOG.filter((b) => b.genre === 'Mystery & Gothic'),
+    () =>
+      FULL_CATALOG.filter((b) => b.genre === 'Mystery & Gothic').slice(0, 16),
+    []
+  );
+
+  const sciFiFantasy = useMemo(
+    () =>
+      FULL_CATALOG.filter((b) => b.genre === 'Sci-Fi & Fantasy').slice(0, 16),
     []
   );
 
@@ -348,6 +356,15 @@ function StreamingAppShell() {
                   onSelectBook={setSelectedBook}
                   onQuickPlay={(b) => playBook(b)}
                 />
+
+                <BookCarouselRail
+                  title="Sci-Fi & Fantasy"
+                  subtitle="Speculative journeys and timeless adventures"
+                  books={sciFiFantasy}
+                  progressMap={progressMap}
+                  onSelectBook={setSelectedBook}
+                  onQuickPlay={(b) => playBook(b)}
+                />
               </>
             )}
           </div>
@@ -356,13 +373,18 @@ function StreamingAppShell() {
         {/* BROWSE VIEW */}
         {activeTab === 'browse' && (
           <div className="space-y-6">
-            <div>
-              <h1 className="font-display text-2xl font-semibold text-[#F4F1EA] sm:text-3xl">
-                Browse Catalog
-              </h1>
-              <p className="mt-1 text-sm text-[#9BA1AE]">
-                Search curated classics or discover thousands of LibriVox recordings.
-              </p>
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h1 className="font-display text-2xl font-semibold text-[#F4F1EA] sm:text-3xl">
+                  Browse Catalog
+                </h1>
+                <p className="mt-1 text-sm text-[#9BA1AE]">
+                  Explore {FULL_CATALOG.length} public-domain LibriVox audiobooks or search for more.
+                </p>
+              </div>
+              <span className="font-mono-tabular text-xs text-[#8C93A1]">
+                {filteredBooks.length} {filteredBooks.length === 1 ? 'title' : 'titles'}
+              </span>
             </div>
 
             <div className="relative max-w-xl">
@@ -619,12 +641,12 @@ function StreamingAppShell() {
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[#9BA1AE]">
                 All recordings in Aublix are free, public-domain works sourced from
-                LibriVox volunteers and hosted by the Internet Archive. Curated
-                editions include {FALLBACK_CATALOG.length} complete works (
+                LibriVox volunteers and hosted by the Internet Archive. The built-in
+                catalog includes {FULL_CATALOG.length} complete works (
                 {formatDurationCompact(
-                  FALLBACK_CATALOG.reduce((s, b) => s + b.totalDurationSeconds, 0)
+                  FULL_CATALOG.reduce((s, b) => s + b.totalDurationSeconds, 0)
                 )}{' '}
-                total runtime), plus live catalog search.
+                total runtime), with audio streaming directly from Archive.org.
               </p>
             </div>
           </div>

@@ -386,7 +386,7 @@ export const FALLBACK_CATALOG: Audiobook[] = [
     edition: 'Lionel Giles Translation',
     year: -500,
     genre: 'Philosophy',
-    coverUrl: '',
+    coverUrl: '/src/assets/images/cover_art_of_war_1795868234898.jpg',
     coverAccent: '#A64B3B',
     totalDurationSeconds: 4560,
     source: 'curated',

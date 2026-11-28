@@ -1,9 +1,9 @@
-import { FALLBACK_CATALOG } from '../data/fallbackCatalog';
+import { FULL_CATALOG } from '../data/catalog';
 import { Audiobook, Chapter, GenreCategory } from '../types/audiobook';
 
 export async function searchAudiobooks(query: string): Promise<Audiobook[]> {
   const q = query.trim().toLowerCase();
-  const localMatches = FALLBACK_CATALOG.filter(
+  const localMatches = FULL_CATALOG.filter(
     (book) =>
       !q ||
       book.title.toLowerCase().includes(q) ||
@@ -12,7 +12,8 @@ export async function searchAudiobooks(query: string): Promise<Audiobook[]> {
       book.synopsis.toLowerCase().includes(q)
   );
 
-  if (!q || q.length < 2) {
+  // Only hit the backend Archive.org search when nothing in the Top 100+ static catalog matches
+  if (!q || q.length < 2 || localMatches.length > 0) {
     return localMatches;
   }
 
@@ -20,17 +21,7 @@ export async function searchAudiobooks(query: string): Promise<Audiobook[]> {
     const res = await fetch(`/api/catalog/search?q=${encodeURIComponent(query.trim())}`);
     if (!res.ok) return localMatches;
     const data = (await res.json()) as { books?: Audiobook[] };
-    const remoteBooks = Array.isArray(data.books) ? data.books : [];
-
-    const seenIds = new Set(localMatches.map((b) => b.id));
-    const merged = [...localMatches];
-    for (const book of remoteBooks) {
-      if (book && book.id && !seenIds.has(book.id)) {
-        seenIds.add(book.id);
-        merged.push(book);
-      }
-    }
-    return merged;
+    return Array.isArray(data.books) ? data.books : localMatches;
   } catch {
     return localMatches;
   }

@@ -40,7 +40,7 @@ export function BookDetailDrawer({ book, onClose }: BookDetailDrawerProps) {
     setChapters(book.chapters);
     setTotalDuration(book.totalDurationSeconds);
 
-    if (book.archiveId && book.chapters.length <= 4) {
+    if (book.archiveId && !book.chaptersPrebaked && book.chapters.length <= 4) {
       let active = true;
       setLoadingChapters(true);
       fetchFullBookChapters(book.archiveId)

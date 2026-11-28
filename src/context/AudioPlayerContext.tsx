@@ -199,7 +199,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       const pos = audio.currentTime;
       setCurrentTime(pos);
       const now = Date.now();
-      if (activeBook && now - lastSyncRef.current > 8000) {
+      if (activeBook && now - lastSyncRef.current > 25000) {
         lastSyncRef.current = now;
         syncProgressNow(
           activeBook,
@@ -322,8 +322,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setCurrentTime(targetPos);
       setDuration(book.chapters[targetChapterIdx]?.durationSeconds || 0);
 
-      // Enrich full chapter list in background if book came from curated initial subset
-      if (book.archiveId && book.chapters.length <= 4) {
+      // Enrich full chapter list only when not already pre-baked into the catalog
+      if (book.archiveId && !book.chaptersPrebaked && book.chapters.length <= 4) {
         fetchFullBookChapters(book.archiveId).then((remoteChapters) => {
           if (remoteChapters && remoteChapters.length > book.chapters.length) {
             const totalDurationSeconds = remoteChapters.reduce(

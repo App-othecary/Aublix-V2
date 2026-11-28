@@ -48,6 +48,7 @@ export function MiniPlayer() {
               author={activeBook.author}
               coverUrl={activeBook.coverUrl}
               accentColor={activeBook.coverAccent}
+              compact
               className="rounded-md"
             />
           </div>

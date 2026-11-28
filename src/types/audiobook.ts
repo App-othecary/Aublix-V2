@@ -30,6 +30,7 @@ export interface Audiobook {
   chapters: Chapter[];
   featured?: boolean;
   source: 'curated' | 'librivox';
+  chaptersPrebaked?: boolean;
 }
 
 export interface ListeningProgress {
